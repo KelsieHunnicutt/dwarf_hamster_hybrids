@@ -1,0 +1,1 @@
+Hello! This directory is intentionally empty. When the Mouse Rmd file followed by the Hamster Rmd file are run, files containing the sets of "induced genes" that were generated throughout the course of analysis will be generated.

@@ -1,0 +1,1 @@
+Hello! This directory is intentionally empty. When the Mouse Rmd file followed by the Hamster Rmd file are run, the unedited figures from the manuscript will go here if "exportFigs" is set to TRUE.
