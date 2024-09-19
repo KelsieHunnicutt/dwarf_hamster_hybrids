@@ -1,0 +1,32 @@
+[pixy] pixy 1.2.8.beta1
+[pixy] See documentation at https://pixy.readthedocs.io/en/latest/
+
+[pixy] Validating VCF and input parameters...
+[pixy] Checking write access...OK
+[pixy] Checking CPU configuration...OK
+[pixy] Checking for invariant sites...OK
+[pixy] Checking chromosome data...OK
+[pixy] Checking intervals/sites...OK
+[pixy] Checking sample data...OK
+[pixy] All initial checks past!
+
+[pixy] Preparing for calculation of summary statistics: pi, fst, dxy
+[pixy] Using Weir and Cockerham (1984)'s estimator of FST.
+[pixy] Data set contains 3 population(s), 1 chromosome(s), and 20 sample(s)
+[pixy] Window size: 10000 bp
+
+[pixy] Started calculations at 14:48:48 on 2024-09-15
+[pixy] Using 4 out of 10 available CPU cores
+
+[pixy] Processing chromosome/contig CM043863.1...
+[pixy] Calculating statistics for region CM043863.1:1-13428094...
+
+[pixy] All calculations complete at 14:49:15 on 2024-09-15
+[pixy] Time elapsed: 00:00:26
+[pixy] Output files written to: hamster_RNASeq_psun_ncbi_justChr_allSites_finalFilter_maxMissing_0.90_fixedNames/
+
+[pixy] NOTE: There are pixy temp files in hamster_RNASeq_psun_ncbi_justChr_allSites_finalFilter_maxMissing_0.90_fixedNames/
+[pixy] If these are not actively being used (e.g. by another running pixy process), they can be safely deleted.
+
+[pixy] If you use pixy in your research, please cite the following paper:
+[pixy] Korunes, KL and K Samuk. pixy: Unbiased estimation of nucleotide diversity and divergence in the presence of missing data. Mol Ecol Resour. 2021 Jan 16. doi: 10.1111/1755-0998.13326.

@@ -48,16 +48,16 @@ void setup() {
   //dipSig = loadTable("Hyb.Comb.DIP_sig.csv", "header");
   //rsSig = loadTable("Hyb.Comb.RS_sig.csv", "header");
   
-    beginRecord(PDF, "DE_genes_hybrids_MusP_logFC_MusP.pdf");
+    beginRecord(PDF, "mouse_DE_genes_hybrids_trans_logFC_MusP.pdf");
 
-  sp = loadTable("hybrid_mouse_MusP_SP_DE_Genes.csv", "header");
-  lz = loadTable("hybrid_mouse_MusP_LZ_DE_Genes.csv", "header");
-  dip = loadTable("hybrid_mouse_MusP_DIP_DE_Genes.csv", "header");
-  rs = loadTable("hybrid_mouse_MusP_RS_DE_Genes.csv", "header");
-  spSig = loadTable("Hyb.MusP.SP_sig.csv", "header");
-  lzSig = loadTable("Hyb.MusP.LZ_sig.csv", "header");
-  dipSig = loadTable("Hyb.MusP.DIP_sig.csv", "header");
-  rsSig = loadTable("Hyb.MusP.RS_sig.csv", "header");
+  sp = loadTable("hybrid_mouse_trans_SP_DE_Genes.csv", "header");
+  lz = loadTable("hybrid_mouse_trans_LZ_DE_Genes.csv", "header");
+  dip = loadTable("hybrid_mouse_trans_DIP_DE_Genes.csv", "header");
+  rs = loadTable("hybrid_mouse_trans_RS_DE_Genes.csv", "header");
+  spSig = loadTable("Mouse.SP_sig.csv", "header");
+  lzSig = loadTable("Mouse.LZ_sig.csv", "header");
+  dipSig = loadTable("Mouse.DIP_sig.csv", "header");
+  rsSig = loadTable("Mouse.RS_sig.csv", "header");
 
   //noSmooth();
   theBest = createFont("HelveticaNeue-Thin", 16);
@@ -302,7 +302,7 @@ class GeneRing {
         println(row2.getString("chr") + " " + row2.getString("start") + " " + mappedStart);
 
         //up or down
-        float fc = row2.getFloat("logFC");
+        float fc = row2.getFloat("logFC.x");
         if (fc > 0) {
           stroke(ringColorUp);
         } else if (fc < 0) {

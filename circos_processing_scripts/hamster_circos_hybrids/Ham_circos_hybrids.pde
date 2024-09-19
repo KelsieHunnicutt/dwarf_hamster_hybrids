@@ -31,16 +31,16 @@ void setup() {
   strokeCap(SQUARE);
   ellipseMode(CENTER);
 
-  genome_info = loadTable("psun_chromosomes_longChromosomes.csv", "header");
+  genome_info = loadTable("psun_chromosomes.csv", "header");
   
-    beginRecord(PDF, "DE_genes_hybrids_BBBB_logFC_BBBB.pdf");
+    beginRecord(PDF, "hamster_DE_genes_hybrids_trans_logFC_BBBB.pdf");
 
-  sp = loadTable("hybrid_hamster_BBBB_SP_DE_Genes.csv", "header");
-  lz = loadTable("hybrid_hamster_BBBB_LZ_DE_Genes.csv", "header");
-  dip = loadTable("hybrid_hamster_BBBB_DIP_DE_Genes.csv", "header");
-  spSig = loadTable("Hyb.BB.SP_sig.csv", "header");
-  lzSig = loadTable("Hyb.BB.LZ_sig.csv", "header");
-  dipSig = loadTable("Hyb.BB.DIP_sig.csv", "header");
+  sp = loadTable("hybrid_hamster_trans_SP_DE_Genes.csv", "header");
+  lz = loadTable("hybrid_hamster_trans_LZ_DE_Genes.csv", "header");
+  dip = loadTable("hybrid_hamster_trans_DIP_DE_Genes.csv", "header");
+  spSig = loadTable("Hamster.SP_sig.csv", "header");
+  lzSig = loadTable("Hamster.LZ_sig.csv", "header");
+  dipSig = loadTable("Hamster.DIP_sig.csv", "header");
 
   //noSmooth();
   theBest = createFont("HelveticaNeue-Thin", 16);
@@ -273,7 +273,7 @@ class GeneRing {
         println(row2.getString("chr") + " " + row2.getString("start") + " " + mappedStart);
 
         //up or down
-        float fc = row2.getFloat("logFC");
+        float fc = row2.getFloat("logFC.x");
         if (fc > 0) {
           stroke(ringColorUp);
         } else if (fc < 0) {

@@ -1,0 +1,264 @@
+---
+title: "Pixy calculation"
+output: html_document
+date: "2024-07-15"
+---
+
+```{r setup, include=TRUE}
+#load packages; make sure these are installed on your machine
+suppressMessages(library("ggplot2")) #for data visualizing
+suppressMessages(library("readr"))
+suppressMessages(library("tidyverse"))
+suppressMessages(library("cowplot"))
+
+#set working directory and get today's date; set to the directory corresponding to where you downloaded this repository
+knitr::opts_knit$set(root.dir = "~/Library/CloudStorage/Dropbox-Personal/1_Denver/Research/Hamsters/Sterile_hamster_hybrids/github_repository_sterile_hamster_hybrids_post-revisions/pixy/")
+#all_labels()
+getwd()
+options(scipen = 999)
+
+todays_date <- gsub("^[A-z][A-z][A-z] *([A-z][A-z][A-z]) *([0-9]+).*20([0-9][0-9])", "\\2\\1\\3", date())
+todays_date
+
+sessionInfo()
+```
+
+```{r hamster-pi-and-dxy}
+#read in which scaffold correspond to chromosomes for Psun genome
+hamster_chromosomes <- read.csv("../input_data/psun_chromosomes_ncbi_to_Moore_2022.csv")
+hamster_chromosomes <- hamster_chromosomes[hamster_chromosomes$main == "yes",]
+chrOrder <- hamster_chromosomes$ncbi
+chosenChromosomes <- hamster_chromosomes$ncbi
+
+calculate_hamster_pi_dxy <- function(max_missing) {
+  hamster_dxy_files <- paste("hamster_RNASeq_psun_ncbi_justChr_allSites_finalFilter_maxMissing_", 
+                             max_missing, "_fixedNames/", 
+                             paste(chosenChromosomes, "_dxy.txt", sep = ""), 
+                             sep = "")
+  
+  #reads in dxy estimates for all chromosomes
+  hamster_dxy_df <- do.call(rbind, lapply(hamster_dxy_files, function(i) {read.table(i, header=TRUE)} ))
+  
+  hamster_pi_files <- paste("hamster_RNASeq_psun_ncbi_justChr_allSites_finalFilter_maxMissing_", 
+                            max_missing, "_fixedNames/", 
+                            paste(chosenChromosomes, "_pi.txt", sep = ""), 
+                            sep = "")
+  
+  #reads in pi estimates for all chromosomes
+  hamster_pi_df <- do.call(rbind, lapply(hamster_pi_files, function(i) {read.table(i, header=TRUE)} ))
+  
+  # Find the chromosome names and order them: first numerical order, then any non-numerical chromosomes
+  hamster_dxy_df$chromosome <- factor(hamster_dxy_df$chromosome, levels = chrOrder)
+  hamster_pi_df$chromosome <- factor(hamster_pi_df$chromosome, levels = chrOrder)
+  
+  #initialize empty dataframes
+  summary_pi_df <- data.frame()
+  summary_dxy_df <- data.frame()
+  
+  #calculate genome-wide average pi for a given population following pixy manual
+  pops <- unique(hamster_pi_df$pop)
+  for (p in pops){
+    thisPop <- subset(hamster_pi_df, pop == p)
+    print(paste("At ", 1 - as.numeric(max_missing), "% missing data, genome-wide pi for ", 
+                p, " is ", 
+                round(sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/sum(thisPop[thisPop$no_sites != 0,]$count_comparisons), 4),
+                sep = ""))
+    summary_pi_df <- rbind(summary_pi_df, 
+                           data.frame(pop = p, 
+                                      species = "hamster", 
+                                      missing_data = (1 - as.numeric(max_missing)),
+                                      average_pi = sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/
+                                        sum(thisPop[thisPop$no_sites != 0,]$count_comparisons)))
+  }
+  
+  #calculate genome-wide average dxy for a given population pair following pixy manual
+  pops <- unique(hamster_dxy_df[c("pop1", "pop2")])
+  for (p in 1:nrow(pops)){
+    combo <- pops[p,]
+    thisPop <- subset(hamster_dxy_df, pop1 == combo$pop1[[1]] & pop2 == combo$pop2[[1]])
+    print(paste("At ", 1 - as.numeric(max_missing), "% missing data, genome-wide dxy for ", 
+                paste(combo, collapse = " x "), " is ", 
+                round(sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/sum(thisPop[thisPop$no_sites != 0,]$count_comparisons), 4),
+                sep = ""))
+    summary_dxy_df <- rbind(summary_dxy_df, 
+                            data.frame(pop1 = combo[1], 
+                                       pop2 = combo[2],
+                                       species = "hamster", 
+                                       missing_data = (1 - as.numeric(max_missing)),
+                                       average_dxy = sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/
+                                         sum(thisPop[thisPop$no_sites != 0,]$count_comparisons)))
+  }
+  
+  assign(paste("hamster_pi_", max_missing, "_df", sep = ""), summary_pi_df, envir = .GlobalEnv)
+  assign(paste("hamster_dxy_", max_missing, "_df", sep = ""), summary_dxy_df, envir = .GlobalEnv)
+}
+
+invisible(lapply(c("0.10", "0.20", "0.30", "0.50", "0.75", "0.90",  "1.00"), calculate_hamster_pi_dxy))
+
+hamster_pi_all_df <- rbind(hamster_pi_0.10_df,
+                           hamster_pi_0.20_df,
+                           hamster_pi_0.30_df,
+                           hamster_pi_0.50_df,
+                           hamster_pi_0.75_df,
+                           hamster_pi_0.90_df,
+                           hamster_pi_1.00_df)
+
+hamster_dxy_all_df <- rbind(hamster_dxy_0.10_df,
+                            hamster_dxy_0.20_df,
+                            hamster_dxy_0.30_df,
+                            hamster_dxy_0.50_df,
+                            hamster_dxy_0.75_df,
+                            hamster_dxy_0.90_df,
+                            hamster_dxy_1.00_df)
+```
+
+```{r mouse-pi-and-dxy}
+#establish the order of mouse chromosomes
+# Find the chromosome names and order them: first numerical order, then any non-numerical chromosomes
+chrOrder <- c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19")
+
+calculate_mouse_pi_dxy <- function(max_missing) {
+  
+  mouse_dxy_files <- paste("mouse_RNASeq_mmus_GRCm38_allSites_finalFilter_maxMissing_", 
+                           max_missing, "/",
+                           grep("[0-9]", 
+                                list.files(path = paste("mouse_RNASeq_mmus_GRCm38_allSites_finalFilter_maxMissing_", 
+                                                    max_missing, "/", sep = ""),
+                                                    pattern = "dxy"), value = TRUE), 
+                           sep = "")
+  
+  #reads in dxy estimates for all chromosomes
+  mouse_dxy_df <- do.call(rbind, lapply(mouse_dxy_files, function(i) {read.table(i, header=TRUE)} ))
+  
+  mouse_pi_files <- paste("mouse_RNASeq_mmus_GRCm38_allSites_finalFilter_maxMissing_", 
+                           max_missing, "/",
+                           grep("[0-9]", 
+                                list.files(path = paste("mouse_RNASeq_mmus_GRCm38_allSites_finalFilter_maxMissing_", 
+                                                    max_missing, "/", sep = ""),
+                                                    pattern = "pi"), value = TRUE), 
+                           sep = "")
+  
+  
+  #reads in pi estimates for all chromosomes
+  mouse_pi_df <- do.call(rbind, lapply(mouse_pi_files, function(i) {read.table(i, header=TRUE)} ))
+  
+  # Find the chromosome names and order them: first numerical order, then any non-numerical chromosomes
+  mouse_dxy_df$chromosome <- factor(mouse_dxy_df$chromosome, levels = chrOrder)
+  mouse_pi_df$chromosome <- factor(mouse_pi_df$chromosome, levels = chrOrder)
+  
+  #initialize empty dataframes
+  summary_pi_df <- data.frame()
+  summary_dxy_df <- data.frame()
+  
+  #calculate genome-wide average pi for a given population following pixy manual
+  pops <- unique(mouse_pi_df$pop)
+  for (p in pops){
+    thisPop <- subset(mouse_pi_df, pop == p)
+    print(paste("At ", 1 - as.numeric(max_missing), "% missing data, genome-wide pi for ", 
+                p, " is ", 
+                round(sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/sum(thisPop[thisPop$no_sites != 0,]$count_comparisons), 4),
+                sep = ""))
+    summary_pi_df <- rbind(summary_pi_df, 
+                           data.frame(pop = p, 
+                                      species = "mouse", 
+                                      missing_data = (1 - as.numeric(max_missing)),
+                                      average_pi = sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/
+                                        sum(thisPop[thisPop$no_sites != 0,]$count_comparisons)))
+  }
+  
+  #calculate genome-wide average dxy for a given population pair following pixy manual
+  pops <- unique(mouse_dxy_df[c("pop1", "pop2")])
+  for (p in 1:nrow(pops)){
+    combo <- pops[p,]
+    thisPop <- subset(mouse_dxy_df, pop1 == combo$pop1[[1]] & pop2 == combo$pop2[[1]])
+    print(paste("At ", 1 - as.numeric(max_missing), "% missing data, genome-wide dxy for ", 
+                paste(combo, collapse = " x "), " is ", 
+                round(sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/sum(thisPop[thisPop$no_sites != 0,]$count_comparisons), 4),
+                sep = ""))
+    summary_dxy_df <- rbind(summary_dxy_df, 
+                            data.frame(pop1 = combo[1], 
+                                       pop2 = combo[2],
+                                       species = "mouse", 
+                                       missing_data = (1 - as.numeric(max_missing)),
+                                       average_dxy = sum(thisPop[thisPop$no_sites != 0,]$count_diffs)/
+                                         sum(thisPop[thisPop$no_sites != 0,]$count_comparisons)))
+  }
+  
+  assign(paste("mouse_pi_", max_missing, "_df", sep = ""), summary_pi_df, envir = .GlobalEnv)
+  assign(paste("mouse_dxy_", max_missing, "_df", sep = ""), summary_dxy_df, envir = .GlobalEnv)
+}
+
+invisible(lapply(c("0.10", "0.20", "0.30", "0.50", "0.75", "0.90",  "1.00"), calculate_mouse_pi_dxy))
+
+mouse_pi_all_df <- rbind(mouse_pi_0.10_df,
+                         mouse_pi_0.20_df,
+                         mouse_pi_0.30_df,
+                         mouse_pi_0.50_df,
+                         mouse_pi_0.75_df,
+                         mouse_pi_0.90_df,
+                         mouse_pi_1.00_df)
+
+mouse_dxy_all_df <- rbind(mouse_dxy_0.10_df,
+                          mouse_dxy_0.20_df,
+                          mouse_dxy_0.30_df,
+                          mouse_dxy_0.50_df,
+                          mouse_dxy_0.75_df,
+                          mouse_dxy_0.90_df,
+                          mouse_dxy_1.00_df)
+```
+
+```{r visualization}
+#combine mouse and hamster results for pi
+lines_in_study <- c("BBBB", "BBSS", "SSSS", "CCPP", "PPLL", "WWLL")
+summary_pi_df <- rbind(hamster_pi_all_df, mouse_pi_all_df)
+summary_pi_df$pop <- factor(summary_pi_df$pop, levels = lines_in_study)
+summary_pi_df$species <- factor(summary_pi_df$species, levels = c("mouse", "hamster"))
+summary_pi_df$missing_data <- factor(summary_pi_df$missing_data)
+
+#combine mouse and hamster results for dxy
+summary_dxy_df <- rbind(hamster_dxy_all_df, mouse_dxy_all_df)
+summary_dxy_df$combo <- paste(summary_dxy_df$pop1, summary_dxy_df$pop2, sep = "_")
+summary_dxy_df$combo <- factor(summary_dxy_df$combo, levels = c("BBBB_SSSS", "BBBB_BBSS", "BBSS_SSSS",
+                                                                "CCPP_WWLL", "CCPP_PPLL", "PPLL_WWLL"))
+summary_dxy_df$species <- factor(summary_dxy_df$species, levels = c("mouse", "hamster"))
+summary_dxy_df$missing_data <- factor(summary_dxy_df$missing_data)
+
+
+#pi visualization
+pi_summary_plot <- ggplot(summary_pi_df, aes(x = pop, y = average_pi, fill = missing_data)) +
+  geom_jitter(shape = 21, color = "black", width = 0.075) +
+  theme_bw() +
+  scale_fill_manual(values = c("#1E1E1E", "#373737", "#626161", "darkgray", "gray", "lightgray", "white")) +
+  facet_wrap(vars(species), ncol = 2, scales = "free_x") +
+  ylab("Nucleotide diversity (pi)") +
+  xlab("Cross or Strain") +
+  ylim(0, max(c(summary_pi_df$average_pi, summary_dxy_df$average_dxy))*1.1) +
+  scale_x_discrete(labels=c("M. mus", "Hybrid", "M. dom",
+                            "P. cam", "Hybrid", "P. sun")) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5)i d,
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_blank())
+pi_summary_plot 
+
+#dxy visualization
+dxy_summary_plot <- ggplot(summary_dxy_df, aes(x = combo, y = average_dxy, fill = missing_data)) +
+  geom_point(shape = 21, color = "black") +
+  theme_bw() +
+  scale_fill_manual(values = c("#1E1E1E", "#373737", "#626161", "darkgray", "gray", "lightgray", "white")) +
+  facet_wrap(vars(species), ncol = 2, scales = "free_x") +
+  scale_x_discrete(labels=c("M. mus x M. dom", "M. mus x Hybrid", "M. dom x Hybrid",
+                            "P. cam x P.sun", "P. cam x Hybrid", "P. sun x Hybrid")) +
+  ylab("Nucleotide divergence (dxy)") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
+        panel.grid.major.x = element_blank(),
+        axis.title.x = element_blank()) +
+  ylim(0, max(c(summary_pi_df$average_pi, summary_dxy_df$average_dxy))*1.1)
+dxy_summary_plot 
+
+ggsave(filename = "exported_figs/summary_pi_dxy_plot.pdf", 
+       plot_grid(pi_summary_plot, dxy_summary_plot, nrow = 1, align = "vh"), 
+       width = 10, height = 3)
+```
+
+
+

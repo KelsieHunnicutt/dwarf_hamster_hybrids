@@ -1,6 +1,6 @@
 # Disrupted hybrid gene expression in dwarf hamsters and house mice
 
-This repository is for data processing and analysis related to Hunnicutt et al. 2023, "Different complex regulatory phenotypes underlie hybrid male sterility in divergent rodent crosses" with Colin Callahan, Sara Keeble, Emily C. Moore, Jeffrey M. Good, and Erica L. Larson.
+This repository is for data processing and analysis related to Hunnicutt et al. 2024, "Different complex regulatory phenotypes underlie hybrid male sterility in divergent rodent crosses" with Colin Callahan, Sara Keeble, Emily C. Moore, Jeffrey M. Good, and Erica L. Larson.
 
 Below, are example commands that were used to take raw RNAseq fastq data to count data. All analyses were conducted on the University of Denver Research Data Analysis Cluster (RDAC) running Red Hat Enterprise Linux Server release 7.9 (Maipo). Reference hamster genome is available on NCBI (*Phodopus sungorus*: GCA_023856395.1).
 # Read processing and mapping
