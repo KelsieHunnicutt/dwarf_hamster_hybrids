@@ -33,7 +33,7 @@ suppressMessages(library("mygene")) #for annotation of overlap genes
 suppressMessages(library("GOSim")) #retrieve go terms associated with a given gene
 
 #set working directory and get today's date; set to the directory corresponding to where you downloaded this repository
-knitr::opts_knit$set(root.dir = "~/Library/CloudStorage/Dropbox/1_Denver/Research/Hamsters/Sterile_hamster_hybrids/github_repository_sterile_hamster_hybrids_post-revisions/")
+knitr::opts_knit$set(root.dir = "github_repository_sterile_hamster_hybrids_post-revisions/")
 all_labels()
 unlink(".RData")
 options(scipen = 999)

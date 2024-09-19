@@ -29,7 +29,7 @@ suppressMessages(library("dendextend")) #for dendogram plotting
 suppressMessages(library("cowplot")) # for multipanel plot organization
 
 #set working directory and get today's date; set to the directory corresponding to where you downloaded this repository
-knitr::opts_knit$set(root.dir = "~/Library/CloudStorage/Dropbox-Personal/1_Denver/Research/Hamsters/Sterile_hamster_hybrids/github_repository_sterile_hamster_hybrids_post-revisions/")
+knitr::opts_knit$set(root.dir = "github_repository_sterile_hamster_hybrids_post-revisions/")
 unlink(".RData")
 all_labels()
 options(scipen = 999)

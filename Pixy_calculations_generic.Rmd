@@ -12,7 +12,7 @@ suppressMessages(library("tidyverse"))
 suppressMessages(library("cowplot"))
 
 #set working directory and get today's date; set to the directory corresponding to where you downloaded this repository
-knitr::opts_knit$set(root.dir = "~/Library/CloudStorage/Dropbox-Personal/1_Denver/Research/Hamsters/Sterile_hamster_hybrids/github_repository_sterile_hamster_hybrids_post-revisions/example_pixy_location")
+knitr::opts_knit$set(root.dir = "github_repository_sterile_hamster_hybrids_post-revisions/example_pixy_location")
 #all_labels()
 getwd()
 options(scipen = 999)
