@@ -29,7 +29,7 @@ suppressMessages(library("dendextend")) #for dendogram plotting
 suppressMessages(library("cowplot")) # for multipanel plot organization
 
 #set working directory and get today's date; set to the directory corresponding to where you downloaded this repository
-knitr::opts_knit$set(root.dir = "github_repository_sterile_hamster_hybrids_post-revisions/")
+knitr::opts_knit$set(root.dir = "your_working_directory")
 unlink(".RData")
 all_labels()
 options(scipen = 999)
@@ -213,7 +213,7 @@ norm.method <- "RLE"
 #norm.method <- "TMM"
 
 #should figures should be written to files or plotted in R?
-exportFigs <- FALSE
+exportFigs <- TRUE
 
 #printing for record keeping purposes
 paste("countfile used:", count_file.path, sep = " ")
@@ -779,22 +779,16 @@ rpkm_norm_by_cell_type_long_density_plot
 ```{r defining-sets-of-expressed-genes}
 #get expressed genes meeting filtering requirements from those DGEs you just set up
 #expressed across all samples
-all_exp <- rownames(dgeMouse$genes)
+all_exp <- rownames(dgeMouse$genes) #21212
 #expressed across parents
-MusP_DomP_all_exp <- rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("P-", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) 
+MusP_DomP_all_exp <- rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("P-", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) #20048
 
 #expressed within M. m. musculus
-MusP_all_exp <- rownames(dgeMusP$genes)
+MusP_all_exp <- rownames(dgeMusP$genes) #17581
 #expressed within M. m. domesticus
-DomP_all_exp <- rownames(dgeDomP$genes)
+DomP_all_exp <- rownames(dgeDomP$genes) #18167
 #expressed within mus x dom hybrids
-Hyb_all_exp <- rownames(dgeMSHyb$genes)
-
-#expressed across all crosses for each stage
-Hyb_Comb_SP_exp <- rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("SP", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) # 15258
-Hyb_Comb_LZ_exp <- rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("LZ", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) # 14500
-Hyb_Comb_DIP_exp <- rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("DIP", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) # 13647
-Hyb_Comb_RS_exp <- rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("RS", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) # 15453
+Hyb_all_exp <- rownames(dgeMSHyb$genes) #18512
 
 #expressed within M. m. musculus for each stage
 MusP_SP_exp <-  rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("MusP.*SP", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) # 12858
@@ -826,18 +820,7 @@ MusP_DomP_LZ_exp <-  rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("P.*LZ", col
 MusP_DomP_DIP_exp <- rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("P.*DIP", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) # 12864
 MusP_DomP_RS_exp <-  rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("P.*RS", colnames(rpkm.nonLog))] > rpkm.cutoff)  >= min.reps, ]) # 14792
 
-#export the genes expressed across all three crosses in each stage
-write.csv(annotations[annotations$gene %in% Hyb_Comb_SP_exp,c("gene", "gene_name")],  row.names = FALSE,
-          "exported_files/Mouse_SP_exp_genes.csv")
-write.csv(annotations[annotations$gene %in% Hyb_Comb_LZ_exp,c("gene", "gene_name")],  row.names = FALSE,
-          "exported_files/Mouse_LZ_exp_genes.csv")
-write.csv(annotations[annotations$gene %in% Hyb_Comb_DIP_exp,c("gene", "gene_name")], row.names = FALSE,
-          "exported_files/Mouse_DIP_exp_genes.csv")
-write.csv(annotations[annotations$gene %in% Hyb_Comb_RS_exp,c("gene", "gene_name")], row.names = FALSE,
-          "exported_files/Mouse_RS_exp_genes.csv")
-
 #make lists of cell types for hypergeometric tests
-Hyb_Comb_cell_exp.list <- c("Hyb_Comb_SP_exp", "Hyb_Comb_LZ_exp", "Hyb_Comb_DIP_exp", "Hyb_Comb_RS_exp")
 Hyb_MusP_cell_exp.list <- c("Hyb_MusP_SP_exp", "Hyb_MusP_LZ_exp", "Hyb_MusP_DIP_exp", "Hyb_MusP_RS_exp")
 Hyb_DomP_cell_exp.list <- c("Hyb_DomP_SP_exp", "Hyb_DomP_LZ_exp", "Hyb_DomP_DIP_exp", "Hyb_DomP_RS_exp")
 par_cell_exp.list <- c("MusP_DomP_SP_exp", "MusP_DomP_LZ_exp", "MusP_DomP_DIP_exp", "MusP_DomP_RS_exp")
@@ -1287,7 +1270,8 @@ retrieve_contrast_DEs <- function(example_contrast) {
 sapply(contrasts_Mouse, retrieve_contrast_DEs)
 
 #create a dataframe of genes that are DE between hybrids and BOTH parents
-Hyb.Comb.SP.de <- merge(Hyb.MusP.SP.de, Hyb.DomP.SP.de, by = c("Length", "chr", "start", "stop", "gene", "X_category", "gene_name"))
+Hyb.Comb.SP.de <- merge(Hyb.MusP.SP.de, Hyb.DomP.SP.de, by = c("Length", "chr", "start", "stop", "gene", "X_category", "gene_name"),
+                        all = TRUE)
 Hyb.Comb.LZ.de <- merge(Hyb.MusP.LZ.de, Hyb.DomP.LZ.de, by = c("Length", "chr", "start", "stop", "gene", "X_category", "gene_name"))
 Hyb.Comb.DIP.de <- merge(Hyb.MusP.DIP.de, Hyb.DomP.DIP.de, by = c("Length", "chr", "start", "stop", "gene", "X_category", "gene_name"))
 Hyb.Comb.RS.de <- merge(Hyb.MusP.RS.de, Hyb.DomP.RS.de, by = c("Length", "chr", "start", "stop", "gene", "X_category", "gene_name"))
@@ -1313,6 +1297,43 @@ write.csv(MusP.DomP.SP.de,  paste("exported_files/parent_mouse_SP_DE_Genes_logFC
 write.csv(MusP.DomP.LZ.de,  paste("exported_files/parent_mouse_LZ_DE_Genes_logFC_", logFC_cutoff, ".csv", sep = ""))
 write.csv(MusP.DomP.DIP.de, paste("exported_files/parent_mouse_DIP_DE_Genes_logFC_", logFC_cutoff, ".csv", sep = ""))
 write.csv(MusP.DomP.RS.de,  paste("exported_files/parent_mouse_RS_DE_Genes_logFC_", logFC_cutoff, ".csv", sep = ""))
+```
+```{r eligible-DE-expressed genes}
+#define background sets of genes for tests of overlap between mouse and hamster based on if gene had a calculatable logFC in DE contrasts for a given stage 
+Hyb_Comb_SP_exp <- Hyb.Comb.SP.tt[Hyb.Comb.SP.tt$logFC.x != 0 & Hyb.Comb.SP.tt$logFC.y != 0,]$gene # 20697
+Hyb_Comb_LZ_exp <- Hyb.Comb.LZ.tt[Hyb.Comb.LZ.tt$logFC.x != 0 & Hyb.Comb.LZ.tt$logFC.y != 0,]$gene # 20414
+Hyb_Comb_DIP_exp <- Hyb.Comb.DIP.tt[Hyb.Comb.DIP.tt$logFC.x != 0 & Hyb.Comb.DIP.tt$logFC.y != 0,]$gene # 20350
+Hyb_Comb_RS_exp <- Hyb.Comb.RS.tt[Hyb.Comb.RS.tt$logFC.x != 0 & Hyb.Comb.RS.tt$logFC.y != 0,]$gene # 20153
+
+#export the genes expressed across all three crosses in each stage
+write.csv(annotations[annotations$gene %in% Hyb_Comb_SP_exp,c("gene", "gene_name")],  row.names = FALSE,
+          "exported_files/Mouse_SP_all_exp_genes.csv")
+write.csv(annotations[annotations$gene %in% Hyb_Comb_LZ_exp,c("gene", "gene_name")],  row.names = FALSE,
+          "exported_files/Mouse_LZ_all_exp_genes.csv")
+write.csv(annotations[annotations$gene %in% Hyb_Comb_DIP_exp,c("gene", "gene_name")], row.names = FALSE,
+          "exported_files/Mouse_DIP_all_exp_genes.csv")
+write.csv(annotations[annotations$gene %in% Hyb_Comb_RS_exp,c("gene", "gene_name")], row.names = FALSE,
+          "exported_files/Mouse_RS_all_exp_genes.csv")
+
+#export the genes expressed across all three crosses in each stage on the X chromosome
+write.csv(annotations[annotations$gene %in% Hyb_Comb_SP_exp &
+                        annotations$X_category == "X",
+                      c("gene", "gene_name")],  row.names = FALSE,
+          "exported_files/Mouse_SP_X_exp_genes.csv") #811
+write.csv(annotations[annotations$gene %in% Hyb_Comb_LZ_exp &
+                        annotations$X_category == "X",
+                      c("gene", "gene_name")],  row.names = FALSE,
+          "exported_files/Mouse_LZ_X_exp_genes.csv") #784
+write.csv(annotations[annotations$gene %in% Hyb_Comb_DIP_exp &
+                        annotations$X_category == "X",
+                      c("gene", "gene_name")],  row.names = FALSE,
+          "exported_files/Mouse_DIP_X_exp_genes.csv") #760
+write.csv(annotations[annotations$gene %in% Hyb_Comb_RS_exp &
+                        annotations$X_category == "X",
+                      c("gene", "gene_name")],  row.names = FALSE,
+          "exported_files/Mouse_RS_X_exp_genes.csv") #747
+
+Hyb_Comb_cell_exp_list <- c("Hyb_Comb_SP_exp", "Hyb_Comb_LZ_exp", "Hyb_Comb_DIP_exp", "Hyb_Comb_RS_exp")
 ```
 
 ```{r transgressive-expression}
@@ -1452,6 +1473,36 @@ print(paste("There are ", dim(Hyb.Comb.DIP.tt[Hyb.Comb.DIP.tt$category == "trans
             sep = ""))
 print(paste("There are ", dim(Hyb.Comb.RS.tt[Hyb.Comb.RS.tt$category == "transgressive",])[1],
             " genes transgressively differentially expressed in round spermatids between hybrids and both parents", 
+            sep = ""))
+
+#print DE summary stats; specifically, numbers of DE genes for different contrasts
+#same X DE genes
+print(paste("There are ", dim(Hyb.Comb.SP.tt[Hyb.Comb.SP.tt$category == "sameX_only",])[1],
+            " genes differentially expressed in spermatogonia between hybrids and parent with same X", 
+            sep = ""))
+print(paste("There are ", dim(Hyb.Comb.LZ.tt[Hyb.Comb.LZ.tt$category == "sameX_only",])[1],
+            " genes differentially expressed in leptotene/zygotene between hybrids and parent with same X", 
+            sep = ""))
+print(paste("There are ", dim(Hyb.Comb.DIP.tt[Hyb.Comb.DIP.tt$category == "sameX_only",])[1],
+            " genes differentially expressed in diplotene between hybrids and parent with same X", 
+            sep = ""))
+print(paste("There are ", dim(Hyb.Comb.RS.tt[Hyb.Comb.RS.tt$category == "sameX_only",])[1],
+            " genes differentially expressed in round spermatids between hybrids and parent with same X", 
+            sep = ""))
+
+#print DE summary stats; specifically, numbers of DE genes for different contrasts
+#different X DE genes
+print(paste("There are ", dim(Hyb.Comb.SP.tt[Hyb.Comb.SP.tt$category == "diffX_only",])[1],
+            " genes differentially expressed in spermatogonia between hybrids and parent with different X", 
+            sep = ""))
+print(paste("There are ", dim(Hyb.Comb.LZ.tt[Hyb.Comb.LZ.tt$category == "diffX_only",])[1],
+            " genes differentially expressed in leptotene/zygotene between hybrids and parent with different X", 
+            sep = ""))
+print(paste("There are ", dim(Hyb.Comb.DIP.tt[Hyb.Comb.DIP.tt$category == "diffX_only",])[1],
+            " genes differentially expressed in diplotene between hybrids and parent with different X", 
+            sep = ""))
+print(paste("There are ", dim(Hyb.Comb.RS.tt[Hyb.Comb.RS.tt$category == "diffX_only",])[1],
+            " genes differentially expressed in round spermatids between hybrids and parent with different X", 
             sep = ""))
 
 Mouse.SP.DE <- Hyb.Comb.SP.tt[Hyb.Comb.SP.tt$sig_in_both == "yes",]

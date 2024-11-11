@@ -33,7 +33,7 @@ suppressMessages(library("mygene")) #for annotation of overlap genes
 suppressMessages(library("GOSim")) #retrieve go terms associated with a given gene
 
 #set working directory and get today's date; set to the directory corresponding to where you downloaded this repository
-knitr::opts_knit$set(root.dir = "github_repository_sterile_hamster_hybrids_post-revisions/")
+knitr::opts_knit$set(root.dir = "your_working_directory")
 all_labels()
 unlink(".RData")
 options(scipen = 999)
@@ -217,7 +217,7 @@ half_plot_height <- 3
 full_plot_height <- 6
 
 #should figures should be written to files or plotted in R?
-exportFigs <- FALSE
+exportFigs <- TRUE
 ```
 
 <h3>Hamster fertility data</h3>
@@ -1036,17 +1036,6 @@ Hyb_all_exp <- dgeBBSS$genes[c("gene", "mouse_ensemble_ID")] # 19209
 #expressed within P. sungorus
 SSSS_all_exp <- dgeSSSS$genes[c("gene", "mouse_ensemble_ID")] # 20025
 
-#expressed across all crosses for each stage
-Hyb_Comb_SP_exp <- annotations[annotations$gene %in% 
-                                 rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("SP", colnames(rpkm.nonLog))] 
-                                                              > rpkm.cutoff) >= min.reps, ]),c("gene", "mouse_ensemble_ID")] # 18905
-Hyb_Comb_LZ_exp <- annotations[annotations$gene %in% 
-                                 rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("LZ", colnames(rpkm.nonLog))] 
-                                                              > rpkm.cutoff) >= min.reps, ]),c("gene", "mouse_ensemble_ID")] # 18433
-Hyb_Comb_DIP_exp <- annotations[annotations$gene %in% 
-                                  rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("DIP", colnames(rpkm.nonLog))] 
-                                                               > rpkm.cutoff) >= min.reps, ]),c("gene", "mouse_ensemble_ID")] # 16403
-
 #expressed within hybrids for each stage
 Hyb_SP_exp <- annotations[annotations$gene %in% 
                             rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("BBSS.*SP", colnames(rpkm.nonLog))] 
@@ -1116,15 +1105,9 @@ BBBB_SSSS_LZ_exp <-  annotations[annotations$gene %in%
 BBBB_SSSS_DIP_exp <- annotations[annotations$gene %in% 
                                    rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("DIP", grep("BS.", colnames(rpkm.nonLog), value = TRUE, invert = TRUE), value = TRUE)] > rpkm.cutoff)  >= min.reps, ]), c("gene", "mouse_ensemble_ID")] # 14175
 BBBB_SSSS_RS_exp <- annotations[annotations$gene %in% 
-                                   rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("RS", grep("BS.", colnames(rpkm.nonLog), value = TRUE, invert = TRUE), value = TRUE)] > rpkm.cutoff)  >= min.reps, ]), c("gene", "mouse_ensemble_ID")]  # 15901
-
-#export the genes expressed across all three crosses in each stage
-write.csv(Hyb_Comb_SP_exp,  "exported_files/Hamster_SP_exp_genes.csv")
-write.csv(Hyb_Comb_LZ_exp,  "exported_files/Hamster_LZ_exp_genes.csv")
-write.csv(Hyb_Comb_DIP_exp, "exported_files/Hamster_DIP_exp_genes.csv")
+                                  rownames(rpkm.nonLog[rowSums(rpkm.nonLog[,grep("RS", grep("BS.", colnames(rpkm.nonLog), value = TRUE, invert = TRUE), value = TRUE)] > rpkm.cutoff)  >= min.reps, ]), c("gene", "mouse_ensemble_ID")]  # 15901
 
 #make lists of cell types for hypergeometric tests below
-Hyb_Comb_cell_exp_list <- c("Hyb_Comb_SP_exp", "Hyb_Comb_LZ_exp", "Hyb_Comb_DIP_exp")
 Hyb_BB_cell_exp_list <- c("Hyb_BB_SP_exp", "Hyb_BB_LZ_exp", "Hyb_BB_DIP_exp")
 Hyb_SS_cell_exp_list <- c("Hyb_SS_SP_exp", "Hyb_SS_LZ_exp", "Hyb_SS_DIP_exp")
 ```
@@ -2068,6 +2051,34 @@ write.csv(BBBB.SSSS.LZ.de,  paste("exported_files/parent_hamster_LZ_DE_Genes_log
 write.csv(BBBB.SSSS.DIP.de, paste("exported_files/parent_hamster_DIP_DE_Genes_logFC_", logFC_cutoff, ".csv", sep = ""))
 write.csv(BBBB.SSSS.RS.de,  paste("exported_files/parent_hamster_RS_DE_Genes_logFC_", logFC_cutoff, ".csv", sep = ""))
 ```
+```{r eligible-DE-expressed genes}
+#define background sets of genes for tests of overlap between Hamster and hamster based on if gene had a calculatable logFC in DE contrasts for a given stage 
+Hyb_Comb_SP_exp <- Hyb.Comb.SP.tt[Hyb.Comb.SP.tt$logFC.x != 0 & Hyb.Comb.SP.tt$logFC.y != 0 & !is.na(Hyb.Comb.SP.tt$mouse_ensemble_ID),c("gene", "mouse_ensemble_ID")] # 20246
+Hyb_Comb_LZ_exp <- Hyb.Comb.LZ.tt[Hyb.Comb.LZ.tt$logFC.x != 0 & Hyb.Comb.LZ.tt$logFC.y != 0 & !is.na(Hyb.Comb.LZ.tt$mouse_ensemble_ID),c("gene", "mouse_ensemble_ID")] # 20189
+Hyb_Comb_DIP_exp <- Hyb.Comb.DIP.tt[Hyb.Comb.DIP.tt$logFC.x != 0 & Hyb.Comb.DIP.tt$logFC.y != 0 & !is.na(Hyb.Comb.DIP.tt$mouse_ensemble_ID),c("gene", "mouse_ensemble_ID")]  # 20181
+
+Hyb_Comb_SP_X_exp <- Hyb_Comb_SP_exp[Hyb_Comb_SP_exp$gene %in% X_genes,] # 632
+Hyb_Comb_LZ_X_exp <- Hyb_Comb_LZ_exp[Hyb_Comb_LZ_exp$gene %in% X_genes,] # 628
+Hyb_Comb_DIP_X_exp <- Hyb_Comb_DIP_exp[Hyb_Comb_DIP_exp$gene %in% X_genes,]  # 828
+
+#export the genes expressed across all three crosses in each stage
+write.csv(Hyb_Comb_SP_exp,  row.names = FALSE,
+          "exported_files/Hamster_SP_all_exp_genes.csv")
+write.csv(Hyb_Comb_LZ_exp,  row.names = FALSE,
+          "exported_files/Hamster_LZ_all_exp_genes.csv")
+write.csv(Hyb_Comb_DIP_exp, row.names = FALSE,
+          "exported_files/Hamster_DIP_all_exp_genes.csv")
+
+#export the genes expressed across all three crosses in each stage on the X chromosome
+write.csv(Hyb_Comb_SP_X_exp,  row.names = FALSE,
+          "exported_files/Hamster_SP_X_exp_genes.csv") #632
+write.csv(Hyb_Comb_LZ_X_exp,  row.names = FALSE,
+          "exported_files/Hamster_LZ_X_exp_genes.csv") #628
+write.csv(Hyb_Comb_DIP_X_exp,  row.names = FALSE,
+          "exported_files/Hamster_DIP_X_exp_genes.csv") #628
+
+Hyb_Comb_cell_exp_list <- c("Hyb_Comb_SP_exp", "Hyb_Comb_LZ_exp", "Hyb_Comb_DIP_exp")
+```
 
 ```{r transgressive-expression}
 define_transressive_expression_and_plot <- function (example_stage) {
@@ -2081,12 +2092,12 @@ define_transressive_expression_and_plot <- function (example_stage) {
                abs(example_tt$logFC.x) > logFC_cutoff & 
                abs(example_tt$logFC.y) > logFC_cutoff,]$sig_in_both <- "yes" 
   
-  #add column indicating whether genes in hybrids were DE relative to only MusP
+  #add column indicating whether genes in hybrids were DE relative to only Pcam
   example_tt$sig_in_sameX <- "no"
   example_tt[example_tt$FDR.x < 0.05 &
                abs(example_tt$logFC.x) > logFC_cutoff,]$sig_in_sameX <- "yes" 
   
-  #add column indicating whether genes in hybrids were DE relative to only DomP
+  #add column indicating whether genes in hybrids were DE relative to only Psun
   example_tt$sig_in_diffX <- "no"
   example_tt[example_tt$FDR.y < 0.05 &
                abs(example_tt$logFC.y) > logFC_cutoff,]$sig_in_diffX <- "yes" 
@@ -2471,7 +2482,7 @@ comb_DE_categories_percent_long$stage <- factor(comb_DE_categories_percent_long$
 
 comb_DE_categories_percent_long$category <- gsub("perc_", "", comb_DE_categories_percent_long$category)
 comb_DE_categories_percent_long$category <- factor(comb_DE_categories_percent_long$category ,
-                                                   levels = c("diffX_only", "sameX_only", "intermediate", "transgressive"))
+                                                   levels = c("sameX_only", "diffX_only", "intermediate", "transgressive"))
 
 comb_DE_categories_percent_long$percent_DE <- as.numeric(comb_DE_categories_percent_long$percent_DE)
 comb_DE_categories_percent_long$stage_x_species <- paste(comb_DE_categories_percent_long$species,
@@ -2485,6 +2496,10 @@ comb_DE_categories_percent_long$stage_x_species <- factor(comb_DE_categories_per
 
 comb_DE_categories_number_long$species <- factor(comb_DE_categories_number_long$species, levels = c("mouse", "hamster"))
 
+comb_DE_categories_number_long$category <- factor(comb_DE_categories_number_long$category ,
+                                                  levels = c("sameX_only", "diffX_only", "intermediate", "transgressive"))
+
+setorder(comb_DE_categories_number_long, category)
 
 hybrid_DE_area_plot <- ggplot(comb_DE_categories_number_long[!(comb_DE_categories_number_long$stage == "RS" &
                                                                  comb_DE_categories_number_long$species == "hamster"),], 
@@ -2687,9 +2702,9 @@ write.csv(x = data.frame(go_terms_Hyb.Comb.LZ_trans_highlight_results[,c("p_valu
           file = "exported_files/hamster_transgressive_DE_LZ_GO_terms.csv", row.names = FALSE)
 
 write.csv(x = data.frame(go_terms_Hyb.Comb.DIP_trans_highlight_results[,c("p_value", "term_size", "query_size",
-                                                                         "intersection_size", "term_id", "source",
-                                                                         "term_name", "effective_domain_size",
-                                                                         "highlighted", "exp", "fold.enrichment")]),
+                                                                          "intersection_size", "term_id", "source",
+                                                                          "term_name", "effective_domain_size",
+                                                                          "highlighted", "exp", "fold.enrichment")]),
           file = "exported_files/hamster_transgressive_DE_DIP_GO_terms.csv", row.names = FALSE)
 ```
 
@@ -2901,27 +2916,27 @@ RS_Mouse_GO_all_plot
 
 #save full hamster GO term lists to files
 write.csv(x = data.frame(go_terms_Mouse.SP_trans_all_results[,c("p_value", "term_size", "query_size",
-                                                                         "intersection_size", "term_id", "source",
-                                                                         "term_name", "effective_domain_size",
-                                                                         "exp", "fold.enrichment")]),
+                                                                "intersection_size", "term_id", "source",
+                                                                "term_name", "effective_domain_size",
+                                                                "exp", "fold.enrichment")]),
           file = "exported_files/mouse_transgressive_DE_SP_GO_terms.csv")
 
 write.csv(x = data.frame(go_terms_Mouse.LZ_trans_all_results[,c("p_value", "term_size", "query_size",
-                                                                         "intersection_size", "term_id", "source",
-                                                                         "term_name", "effective_domain_size",
-                                                                         "exp", "fold.enrichment")]),
+                                                                "intersection_size", "term_id", "source",
+                                                                "term_name", "effective_domain_size",
+                                                                "exp", "fold.enrichment")]),
           file = "exported_files/mouse_transgressive_DE_LZ_GO_terms.csv")
 
 write.csv(x = data.frame(go_terms_Mouse.DIP_trans_all_results[,c("p_value", "term_size", "query_size",
-                                                                         "intersection_size", "term_id", "source",
-                                                                         "term_name", "effective_domain_size",
-                                                                         "exp", "fold.enrichment")]),
+                                                                 "intersection_size", "term_id", "source",
+                                                                 "term_name", "effective_domain_size",
+                                                                 "exp", "fold.enrichment")]),
           file = "exported_files/mouse_transgressive_DE_DIP_GO_terms.csv")
 
 write.csv(x = data.frame(go_terms_Mouse.RS_trans_all_results[,c("p_value", "term_size", "query_size",
-                                                                         "intersection_size", "term_id", "source",
-                                                                         "term_name", "effective_domain_size",
-                                                                         "exp", "fold.enrichment")]),
+                                                                "intersection_size", "term_id", "source",
+                                                                "term_name", "effective_domain_size",
+                                                                "exp", "fold.enrichment")]),
           file = "exported_files/mouse_transgressive_DE_RS_GO_terms.csv")
 
 ```
@@ -3573,18 +3588,19 @@ enrichment_FDR <- 0.05
 
 test_for_overlap_enrichment <- function(stage) {
   
-  
-  Mouse_exp <- read.csv(paste("exported_files/Mouse_", stage ,"_exp_genes.csv", sep = ""))$gene
+  Mouse_exp <- read.csv(paste("exported_files/Mouse_", stage ,"_all_exp_genes.csv", sep = ""))$gene
   Hamster_exp <- get(paste("Hyb_Comb_", stage, "_exp", sep = ""))[,2]
   
   #a list of genes that are expressed in the given stage in either system
-  exp_in_either <- unique(c(Mouse_exp, Hamster_exp))
+  exp_in_both <- intersect(Mouse_exp, Hamster_exp)
   
-  #a list of the trangressively expressed mouse genes
+  #a list of the trangressively expressed mouse genes that are expressed in either system
   Mouse.trans <- get(paste("Mouse.", stage, ".trans", sep = ""))
+  Mouse.trans <- Mouse.trans[Mouse.trans$gene %in% exp_in_both,]
   
   #a list of the transgressively expressed hamster genes
   Hamster.trans <- get(paste("Hamster.", stage, ".trans", sep = ""))
+  Hamster.trans <- Hamster.trans[unique(Hamster.trans$mouse_ensemble_ID) %in% exp_in_both,]
   
   #a list of the transgressively expressed genes in both hybrid systems
   Both.trans <- intersect(Mouse.trans$gene,
@@ -3592,14 +3608,14 @@ test_for_overlap_enrichment <- function(stage) {
   
   #run phyper tests
   under.p <- phyper(length(Both.trans), 
-                    length(Hamster.trans$mouse_ensemble_ID), 
-                    length(setdiff(exp_in_either,Hamster.trans$mouse_ensemble_ID)), 
+                    length(unique(Hamster.trans$mouse_ensemble_ID)), 
+                    length(exp_in_both) - length(unique(Hamster.trans$mouse_ensemble_ID)), 
                     length(Mouse.trans$gene), 
                     lower.tail = TRUE)
   
   over.p <- phyper(length(Both.trans) - 1, 
-                   length(Hamster.trans$mouse_ensemble_ID), 
-                   length(setdiff(exp_in_either,Hamster.trans$mouse_ensemble_ID)), 
+                   length(unique(Hamster.trans$mouse_ensemble_ID)), 
+                   length(exp_in_both) - length(unique(Hamster.trans$mouse_ensemble_ID)), 
                    length(Mouse.trans$gene), 
                    lower.tail = FALSE)
   
@@ -3608,8 +3624,8 @@ test_for_overlap_enrichment <- function(stage) {
   over <- round(over.p, digits = 5)
   
   #calculate number of observed and expected genes
-  exp <- round((length(Hamster.trans$mouse_ensemble_ID)/
-                  length(setdiff(exp_in_either,Hamster.trans$mouse_ensemble_ID)))*dim(Mouse.SP.trans)[1],
+  exp <- round((length(unique(Hamster.trans$mouse_ensemble_ID))/
+                  (length(exp_in_both) - length(unique(Hamster.trans$mouse_ensemble_ID)))*dim(Mouse.trans)[1]),
                digits = 0)
   obs <- length(Both.trans)
   
@@ -3628,7 +3644,7 @@ test_for_overlap_enrichment <- function(stage) {
   assign(paste(stage, "_overlap_GO_results", sep = ""), overlap_go$result, envir = .GlobalEnv)
   
   return(c(stage, under, over, exp, obs, 
-           length(Mouse.trans$gene), length(Hamster.trans$mouse_ensemble_ID),
+           length(Mouse.trans$gene), length(unique(Hamster.trans$mouse_ensemble_ID)),
            paste(intersect(Mouse.trans$gene,
                            Hamster.trans$mouse_ensemble_ID), 
                  collapse = ",")))
@@ -3648,26 +3664,96 @@ write.csv(file = "exported_files/transgressive_DE_overlap_enrichment_stats.csv",
 #look up gene descriptions for overlap genes in each stage
 #SP
 overlap_definitions_SP_df <- data.frame(cbind(queryMany(unlist(strsplit(overlap_df$number_overlap_DE[1], split = ",")),
-                                    scopes="ensembl.gene", species="mouse"), "SP"))
+                                                        scopes="ensembl.gene", species="mouse"), "SP"))
 colnames(overlap_definitions_SP_df) <- gsub("X.SP.", "stage", colnames(overlap_definitions_SP_df))
 
 #LZ
 overlap_definitions_LZ_df <- data.frame(cbind(queryMany(unlist(strsplit(overlap_df$number_overlap_DE[2], split = ",")),
-                                    scopes="ensembl.gene", species="mouse"), "LZ"))
+                                                        scopes="ensembl.gene", species="mouse"), "LZ"))
 colnames(overlap_definitions_LZ_df) <- gsub("X.LZ.", "stage", colnames(overlap_definitions_LZ_df))
 
 #DIP
 overlap_definitions_DIP_df <- data.frame(cbind(queryMany(unlist(strsplit(overlap_df$number_overlap_DE[3], split = ",")),
-                                    scopes="ensembl.gene", species="mouse"), "DIP"))
+                                                         scopes="ensembl.gene", species="mouse"), "DIP"))
 colnames(overlap_definitions_DIP_df) <- gsub("X.DIP.", "stage", colnames(overlap_definitions_DIP_df))
 
 #combine dataframes
-overlap_definitions_df <- data.frame(do.call(rbind, list(overlap_definitions_SP_df, overlap_definitions_LZ_df, overlap_definitions_DIP_df)))
+overlap_definitions_df <- data.frame(do.call(rbind, lapply(ls(pattern = "overlap_definitions"), function(x)
+  if(exists(x, .GlobalEnv)) get(x) else NULL)))
 overlap_definitions_df <- overlap_definitions_df[,c("query", "name", "symbol", "stage")]
 colnames(overlap_definitions_df) <- c("Ensembl_ID", "gene_description", "gene_symbol", "overlap_stage")
 write.csv(file = "exported_files/transgressive_DE_overlap_genes.csv", x = overlap_definitions_df, row.names = FALSE)
 
 overlap_definitions_df
+```
+
+
+
+```{r x_overlap-in-DE-between-hamster-and-mouse}
+test_for_x_overlap_enrichment <- function(stage) {
+  
+  Mouse_exp <- read.csv(paste("exported_files/Mouse_", stage ,"_all_exp_genes.csv", sep = ""))$gene
+  Hamster_exp <- get(paste("Hyb_Comb_", stage, "_exp", sep = ""))[,2]
+  
+  #a list of genes that are expressed in the given stage in either system
+  exp_in_both <- intersect(Mouse_exp, Hamster_exp)
+  
+  #a list of the trangressively expressed mouse genes that are expressed in either system
+  Mouse.trans <- get(paste("Mouse.", stage, ".trans", sep = ""))
+  Mouse.trans <- Mouse.trans[Mouse.trans$gene %in% exp_in_both,]
+  
+  #a list of the transgressively expressed hamster genes
+  Hamster.trans <- get(paste("Hamster.", stage, ".trans", sep = ""))
+  Hamster.trans <- Hamster.trans[unique(Hamster.trans$mouse_ensemble_ID) %in% exp_in_both,]
+  
+  #a list of the transgressively expressed genes in both hybrid systems
+  Both.trans <- intersect(Mouse.trans$gene,
+                          Hamster.trans$mouse_ensemble_ID)
+  
+  Mouse_X_exp <- read.csv(paste("exported_files/Mouse_", stage ,"_X_exp_genes.csv", sep = ""))$gene
+  Hamster_X_exp <- get(paste("Hyb_Comb_", stage, "_X_exp", sep = ""))[,2]
+  exp_X_in_both <- intersect(Mouse_X_exp, Hamster_X_exp)
+  Both.X.trans <- Both.trans[Both.trans %in% exp_X_in_both]
+  
+  #run phyper tests
+  under.p <- phyper(length(Both.X.trans), 
+                    length(exp_X_in_both), 
+                    length(exp_in_both) - length(exp_X_in_both), 
+                    length(Both.trans), 
+                    lower.tail = TRUE)
+  
+  over.p <- phyper(length(Both.X.trans) - 1, 
+                   length(exp_X_in_both), 
+                   length(exp_in_both) - length(exp_X_in_both), 
+                   length(Both.trans), 
+                   lower.tail = FALSE)
+  
+  #round p-values to 5 digits
+  under <- round(under.p, digits = 5)
+  over <- round(over.p, digits = 5)
+  
+  #calculate number of observed and expected genes
+  exp <- round((length(unique(Hamster.trans$mouse_ensemble_ID))/
+                  (length(exp_in_both)))*dim(Mouse.trans)[1],
+               digits = 0)
+  
+  obs <- length(Both.X.trans)
+  
+  return(c(stage, under, over, exp, obs, 
+           length(Mouse.trans$gene), length(unique(Hamster.trans$mouse_ensemble_ID)),
+           paste(intersect(Mouse.trans$gene,
+                           Hamster.trans$mouse_ensemble_ID), 
+                 collapse = ",")))
+}
+
+#apply hypergeometric tests to DE genes from all stages
+x_overlap_df <- data.frame(do.call(rbind,lapply(c("SP", "LZ", "DIP"), test_for_x_overlap_enrichment)))
+colnames(x_overlap_df) <- c("stage", "depletion_pvalue", "enrichment_pvalue",
+                            "number_expected", "number_observed",
+                            "number_mouse_DE", "number_hamster_DE",
+                            "number_x_overlap_DE")
+write.csv(file = "exported_files/transgressive_DE_x_overlap_enrichment_stats.csv", 
+          x = x_overlap_df[-length(colnames(x_overlap_df))], row.names = FALSE)
 ```
 
 <h3>Plot GO term enrichment from DE genes</h3>
